@@ -1,0 +1,7 @@
+{
+    "default": {
+        "servers": {
+            "cwFrontEnd": "CW-FRONTEND-AMI-*"
+        }
+    }
+}

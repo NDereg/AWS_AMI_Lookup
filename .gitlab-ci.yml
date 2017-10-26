@@ -1,0 +1,30 @@
+stages:
+  - package
+  - deploy
+cache:
+  key: $CI_PIPELINE_ID
+  untracked: true
+variables:
+  AWS_DEFAULT_REGION: us-east-1
+  ZIP_FILE: ami_lookup.zip
+package:
+  stage: package
+  allow_failure: false
+  tags:
+    - default
+  image: 'alpine:latest'
+  script:
+    - apk add --no-cache zip
+    - zip -r $ZIP_FILE . -x *.git* *.vscode*
+production-s3-upload:
+  stage: deploy
+  tags:
+    - default
+  variables:
+    AWS_ACCESS_KEY_ID: $DEV_AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $DEV_AWS_SECRET_ACCESS_KEY
+    PROD_BUCKET: test-dev-cloudformation-template
+  script:
+    - apk add --no-cache py-pip
+    - pip install awscli
+    - 'aws s3 cp $ZIP_FILE s3://$PROD_BUCKET/$ZIP_FILE'
